@@ -1173,7 +1173,7 @@ public class AppCtx {
     }
 
     public boolean update_process_single_release_record(UpdateInfo latest, JSONObject release_info, String my_ver) throws JSONException {
-        if (release_info.getBoolean("prerelease")) {
+        if (BuildConfig.IS_RELEASE == release_info.getBoolean("prerelease")) { // dont mix prerelease and release
             return true;
         }
 
@@ -1210,6 +1210,10 @@ public class AppCtx {
 
             rel_ver = info.getString("ver");
             if (!is_version_string_valid(rel_ver)) {
+                return true;
+            }
+
+            if (BuildConfig.IS_RELEASE == info.has("pre_rel")) { // dont mix release and prerelease
                 return true;
             }
 

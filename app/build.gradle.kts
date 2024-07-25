@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.androidApplication)
 }
 
+var isRelease = false
+
 android {
     namespace = "io.github.sagimor6.woltbillsplitter"
     compileSdk = 34
@@ -21,6 +23,7 @@ android {
 
     signingConfigs {
         if (System.getenv("KEYSTORE_FILE_PATH") != null) {
+            isRelease = ("yes" == System.getenv("IS_RELEASE"))
             create("release") {
                 storeFile = rootProject.file(System.getenv("KEYSTORE_FILE_PATH"))
                 storePassword = System.getenv("KEYSTORE_PASSWORD")
@@ -30,6 +33,7 @@ android {
         } else if (rootProject.file("keystore.properties").exists()) {
             val keystoreProperties = Properties()
             keystoreProperties.load(rootProject.file("keystore.properties").inputStream())
+            isRelease = ("yes" == keystoreProperties.getProperty("isRelease"))
 
             create("release") {
                 storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
@@ -47,7 +51,13 @@ android {
         versionCode = 1
         versionName = "0.0.1"
 
+        buildConfigField("boolean", "IS_RELEASE", isRelease.toString())
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -94,6 +104,9 @@ gradle.projectsEvaluated {
             val jsonObject = JsonObject()
             jsonObject.addProperty("min_update_ver", "0.0.0")
             jsonObject.addProperty("ver", android.defaultConfig.versionName)
+            if (!isRelease) {
+                jsonObject.addProperty("pre_rel", 1) // 1 is less characters than empty string
+            }
             val updaterInfo = jsonObject.toString()
             val base64UpdaterInfo = Base64.getEncoder().withoutPadding().encode(updaterInfo.toByteArray(StandardCharsets.UTF_8))
 
