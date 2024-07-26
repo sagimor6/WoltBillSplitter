@@ -1,10 +1,14 @@
+import com.android.build.gradle.internal.tasks.R8Task
 import com.google.gson.JsonObject
+import java.io.FileOutputStream
 import java.nio.charset.StandardCharsets
 import java.security.KeyStore
 import java.security.PrivateKey
 import java.security.Signature
 import java.util.Base64
 import java.util.Properties
+import java.util.jar.JarFile
+import java.util.jar.JarOutputStream
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -95,6 +99,38 @@ dependencies {
 }
 
 gradle.projectsEvaluated {
+
+    // this is to fix line endings in windows META-INF/services/*, R8 appears to use \r\n
+    // TODO: less hacky
+    tasks.getByName("minifyReleaseWithR8") {
+        doLast {
+            val minResFile = (this as R8Task).outputResources.asFile.get()
+
+            val tempDir = getTemporaryDir()
+            tempDir.createNewFile()
+            val tempJar = File(tempDir, "temp.jar")
+
+            JarFile(minResFile).use { jarFile ->
+                JarOutputStream(FileOutputStream(tempJar)).use { jarOutputStream ->
+                    jarFile.entries().iterator().forEach { jarEntry ->
+                        jarOutputStream.putNextEntry(jarEntry)
+                        val inStream = jarFile.getInputStream(jarEntry)
+                        if (jarEntry.name.startsWith("META-INF/services/")) {
+                            val newContent = inStream.readBytes().toString(StandardCharsets.UTF_8)
+                                .replace("\r\n", "\n")
+                            jarOutputStream.write(newContent.toByteArray(StandardCharsets.UTF_8))
+                        } else {
+                            inStream.copyTo(jarOutputStream)
+                        }
+                        jarOutputStream.closeEntry()
+                    }
+                }
+            }
+
+            tempJar.copyTo(minResFile, overwrite = true)
+        }
+    }
+
     tasks.getByName("assembleRelease") {
         doLast {
             if (android.signingConfigs.findByName("release") == null) {
