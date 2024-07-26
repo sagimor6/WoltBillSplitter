@@ -1383,6 +1383,12 @@ public class AppCtx {
     }
 
     public boolean check_and_install_updates(Context ctx, UpdateInfo new_update_info) throws IOException {
+        if (new_update_info != null) {
+            MyLogger.e("new update found! " + new_update_info.ver);
+        } else {
+            MyLogger.e("no updates found!");
+        }
+
         PackageInstaller packageInstaller = ctx.getPackageManager().getPackageInstaller();
         get_current_install_session_id(ctx);
 
