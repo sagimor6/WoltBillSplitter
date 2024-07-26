@@ -102,32 +102,35 @@ gradle.projectsEvaluated {
 
     // this is to fix line endings in windows META-INF/services/*, R8 appears to use \r\n
     // TODO: less hacky
-    tasks.getByName("minifyReleaseWithR8") {
-        doLast {
-            val minResFile = (this as R8Task).outputResources.asFile.get()
+    if(tasks.findByName("minifyReleaseWithR8") != null) {
+        tasks.getByName("minifyReleaseWithR8") {
+            doLast {
+                val minResFile = (this as R8Task).outputResources.asFile.get()
 
-            val tempDir = getTemporaryDir()
-            tempDir.createNewFile()
-            val tempJar = File(tempDir, "temp.jar")
+                val tempDir = getTemporaryDir()
+                tempDir.createNewFile()
+                val tempJar = File(tempDir, "temp.jar")
 
-            JarFile(minResFile).use { jarFile ->
-                JarOutputStream(FileOutputStream(tempJar)).use { jarOutputStream ->
-                    jarFile.entries().iterator().forEach { jarEntry ->
-                        jarOutputStream.putNextEntry(jarEntry)
-                        val inStream = jarFile.getInputStream(jarEntry)
-                        if (jarEntry.name.startsWith("META-INF/services/")) {
-                            val newContent = inStream.readBytes().toString(StandardCharsets.UTF_8)
-                                .replace("\r\n", "\n")
-                            jarOutputStream.write(newContent.toByteArray(StandardCharsets.UTF_8))
-                        } else {
-                            inStream.copyTo(jarOutputStream)
+                JarFile(minResFile).use { jarFile ->
+                    JarOutputStream(FileOutputStream(tempJar)).use { jarOutputStream ->
+                        jarFile.entries().iterator().forEach { jarEntry ->
+                            jarOutputStream.putNextEntry(jarEntry)
+                            val inStream = jarFile.getInputStream(jarEntry)
+                            if (jarEntry.name.startsWith("META-INF/services/")) {
+                                val newContent =
+                                    inStream.readBytes().toString(StandardCharsets.UTF_8)
+                                        .replace("\r\n", "\n")
+                                jarOutputStream.write(newContent.toByteArray(StandardCharsets.UTF_8))
+                            } else {
+                                inStream.copyTo(jarOutputStream)
+                            }
+                            jarOutputStream.closeEntry()
                         }
-                        jarOutputStream.closeEntry()
                     }
                 }
-            }
 
-            tempJar.copyTo(minResFile, overwrite = true)
+                tempJar.copyTo(minResFile, overwrite = true)
+            }
         }
     }
 

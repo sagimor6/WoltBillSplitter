@@ -1466,7 +1466,6 @@ public class AppCtx {
 
             con.setDoInput(true);
             con.setDoOutput(false);
-            con.setInstanceFollowRedirects(false);
             con.setRequestProperty("User-Agent", MyUtils.userAgent);
 
             con.setReadTimeout(2000);
