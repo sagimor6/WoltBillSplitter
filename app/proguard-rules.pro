@@ -14,8 +14,25 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
-#-renamesourcefileattribute SourceFile
+-renamesourcefileattribute SourceFile
+
+# ---- gson specific start ----
+
+# TODO: we dont really use generics here
+-keepattributes Signature
+
+# we allow shrink or deletion, because unused members have no meaning here
+-keepclassmembers ,allowshrinking,allowoptimization class io.github.sagimor6.woltbillsplitter.** {
+    !transient !static <fields>;
+}
+
+# ---- gson specific end ----
+
+# for easier debugging
+-keep ,allowshrinking,allowoptimization class io.github.sagimor6.woltbillsplitter.** {
+    *;
+}

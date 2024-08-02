@@ -371,6 +371,8 @@ public class MainActivity extends AppCompatActivity {
     private static final Object enqueue_work_lock = new Object();
 
     public static void stop_all_work(Context ctx) {
+        MyLogger.e("stopping all work...");
+
         synchronized (enqueue_work_lock) {
             needs_to_stop_work = true;
         }
