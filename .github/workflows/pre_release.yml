@@ -14,4 +14,4 @@ jobs:
     - run: docker cp $(docker create proj):/app/app/build/outputs/apk/release/app-release-unsigned.apk .
     - uses: actions/upload-artifact@v4.3.5
       with:
-        path: app-release.apk
+        path: app-release-unsigned.apk
