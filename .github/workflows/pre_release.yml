@@ -35,7 +35,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: artifacts
-        path:
+        path: |
           app-release.apk
           app-release.apk.sig
           updater_info.github.txt
