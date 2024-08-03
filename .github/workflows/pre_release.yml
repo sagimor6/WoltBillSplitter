@@ -9,9 +9,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: echo secret
-      env: 
-        aaa: ${{ secrets.MY_SECRET }}
-      run: echo $aaa
-    - name: echo like secret
-      run: echo ${{ secrets.MY_SECRET }} | base64
+    - name: docker build
+      run: docker build -t proj .
+    - name: docker cp $(docker create proj):/app/build/outputs/release/app-release.apk .
+    - uses: actions/upload-artifact@v4.3.5
+      with:
+        path: app-release.apk
