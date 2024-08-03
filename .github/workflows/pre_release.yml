@@ -11,8 +11,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: docker build
       run: docker build -t proj .
-    - run: docker run --entrypoint="ls" proj -la /app/app/; docker run --entrypoint="ls" proj -laR /app/app/build
-    - run: docker cp $(docker create proj):/app/app/build/outputs/apk/release/app-release.apk .
+    - run: docker cp $(docker create proj):/app/app/build/outputs/apk/release/app-release-unsigned.apk .
     - uses: actions/upload-artifact@v4.3.5
       with:
         path: app-release.apk
