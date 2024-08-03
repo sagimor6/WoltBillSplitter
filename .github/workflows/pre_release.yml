@@ -11,18 +11,14 @@ jobs:
     - uses: actions/checkout@v4
     - name: keystore
       env:
-        #STORE_CONTENT: ${{ secrets.PRERELEASE_STORE }}
-        STORE_CONTENT: YQ==
+        STORE_CONTENT: ${{ secrets.PRERELEASE_STORE }}
       run: echo "$STORE_CONTENT" | base64 -d > prerelease_keystore.p12
     # TODO: maybe change this to env vars in docker file
     - name: keystore properties
       env:
-        #PRERELEASE_KEY_ALIAS: ${{ secrets.PRERELEASE_KEY_ALIAS }}
-        #PRERELEASE_STORE_PASSWORD: ${{ secrets.PRERELEASE_STORE_PASSWORD }}
-        #PRERELEASE_KEY_PASSWORD: ${{ secrets.PRERELEASE_KEY_PASSWORD }}
-        PRERELEASE_KEY_ALIAS: bbbbb
-        PRERELEASE_STORE_PASSWORD: ccccc
-        PRERELEASE_KEY_PASSWORD: ddddd
+        PRERELEASE_KEY_ALIAS: ${{ secrets.PRERELEASE_KEY_ALIAS }}
+        PRERELEASE_STORE_PASSWORD: ${{ secrets.PRERELEASE_STORE_PASSWORD }}
+        PRERELEASE_KEY_PASSWORD: ${{ secrets.PRERELEASE_KEY_PASSWORD }}
       run: |
         echo "storeFile=prerelease_keystore.p12" > keystore.properties
         echo "storePassword=${PRERELEASE_STORE_PASSWORD}" >> keystore.properties
