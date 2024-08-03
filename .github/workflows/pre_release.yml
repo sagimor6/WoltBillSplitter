@@ -27,8 +27,18 @@ jobs:
         echo "isRelease=no" >> keystore.properties
     - name: docker build
       run: docker build -t proj .
+    # TODO: dont create each time, maybe save container id to file
     - run: docker cp $(docker create proj):/app/app/build/outputs/apk/release/app-release.apk .
+    - run: docker cp $(docker create proj):/app/app/build/outputs/apk/release/app-release.apk.sig .
+    - run: docker cp $(docker create proj):/app/app/build/outputs/apk/release/updater_info.github.txt .
+    - run: docker cp $(docker create proj):/app/app/build/outputs/mapping/release/mapping.txt .
     - uses: actions/upload-artifact@v4
       with:
-        path: app-release.apk
-        name: app-release.apk
+        name: artifacts
+        path:
+          app-release.apk
+          app-release.apk.sig
+          updater_info.github.txt
+          mapping.txt
+          
+
