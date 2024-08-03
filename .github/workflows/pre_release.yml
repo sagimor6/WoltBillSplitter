@@ -9,11 +9,30 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: keystore
+      env:
+        #STORE_CONTENT: ${{ secrets.PRERELEASE_STORE }}
+        STORE_CONTENT: aaaaaa
+      run: echo "$STORE_CONTENT" | base64 -d > prerelease_keystore.p12
+    # TODO: maybe change this to env vars in docker file
+    - name: keystore properties
+      env:
+        #PRERELEASE_KEY_ALIAS: ${{ secrets.PRERELEASE_KEY_ALIAS }}
+        #PRERELEASE_STORE_PASSWORD: ${{ secrets.PRERELEASE_STORE_PASSWORD }}
+        #PRERELEASE_KEY_PASSWORD: ${{ secrets.PRERELEASE_KEY_PASSWORD }}
+        PRERELEASE_KEY_ALIAS: bbbbb
+        PRERELEASE_STORE_PASSWORD: ccccc
+        PRERELEASE_KEY_PASSWORD: ddddd
+      run: |
+        echo "storeFile=prerelease_keystore.p12" > keystore.properties
+        echo "storePassword=${PRERELEASE_STORE_PASSWORD}" >> keystore.properties
+        echo "keyAlias=${PRERELEASE_KEY_ALIAS}" >> keystore.properties
+        echo "keyPassword=${PRERELEASE_KEY_PASSWORD}" >> keystore.properties
+        echo "isRelease=no" >> keystore.properties
     - name: docker build
       run: docker build -t proj .
-    - run: docker cp $(docker create proj):/app/app/build/outputs/apk/release/app-release-unsigned.apk .
+    - run: docker cp $(docker create proj):/app/app/build/outputs/apk/release/app-release.apk .
     - uses: actions/upload-artifact@v4
       with:
-        path: app-release-unsigned.apk
-        name: app-release-unsigned.apk
-        compression-level: 0
+        path: app-release.apk
+        name: app-release.apk
