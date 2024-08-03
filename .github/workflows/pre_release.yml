@@ -14,6 +14,4 @@ jobs:
         aaa: ${{ secrets.MY_SECRET }}
       run: echo $aaa
     - name: echo like secret
-      env:
-        aaa: ${{ secrets.MY_SECRET }}
-      run: echo $aaa | base64
+      run: echo ${{ secrets.MY_SECRET }} | base64
