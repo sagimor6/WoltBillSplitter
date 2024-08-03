@@ -12,7 +12,7 @@ jobs:
     - name: keystore
       env:
         #STORE_CONTENT: ${{ secrets.PRERELEASE_STORE }}
-        STORE_CONTENT: aaaaaa
+        STORE_CONTENT: YQ==
       run: echo "$STORE_CONTENT" | base64 -d > prerelease_keystore.p12
     # TODO: maybe change this to env vars in docker file
     - name: keystore properties
