@@ -1,4 +1,4 @@
-name: Android CI
+name: Pre-release CI
 
 on:
   workflow_dispatch:
@@ -9,5 +9,35 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: echo lol
-      run: echo lol
+    - name: keystore
+      env:
+        STORE_CONTENT: ${{ secrets.PRERELEASE_STORE }}
+      run: echo "$STORE_CONTENT" | base64 -d > prerelease_keystore.p12
+    # TODO: maybe change this to env vars in docker file
+    - name: keystore properties
+      env:
+        PRERELEASE_KEY_ALIAS: ${{ secrets.PRERELEASE_KEY_ALIAS }}
+        PRERELEASE_STORE_PASSWORD: ${{ secrets.PRERELEASE_STORE_PASSWORD }}
+        PRERELEASE_KEY_PASSWORD: ${{ secrets.PRERELEASE_KEY_PASSWORD }}
+      run: |
+        echo "storeFile=prerelease_keystore.p12" > keystore.properties
+        echo "storePassword=${PRERELEASE_STORE_PASSWORD}" >> keystore.properties
+        echo "keyAlias=${PRERELEASE_KEY_ALIAS}" >> keystore.properties
+        echo "keyPassword=${PRERELEASE_KEY_PASSWORD}" >> keystore.properties
+        echo "isRelease=no" >> keystore.properties
+    - name: docker build
+      run: docker build -t proj .
+    # TODO: dont create each time, maybe save container id to file
+    - run: docker cp $(docker create proj):/app/app/build/outputs/apk/release/app-release.apk .
+    - run: docker cp $(docker create proj):/app/app/build/outputs/apk/release/app-release.apk.sig .
+    - run: docker cp $(docker create proj):/app/app/build/outputs/apk/release/updater_info.github.txt .
+    - run: docker cp $(docker create proj):/app/app/build/outputs/mapping/release/mapping.txt .
+    - uses: actions/upload-artifact@v4
+      with:
+        name: artifacts
+        path: |
+          app-release.apk
+          app-release.apk.sig
+          updater_info.github.txt
+          mapping.txt
+          
